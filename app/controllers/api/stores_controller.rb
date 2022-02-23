@@ -1,7 +1,7 @@
 module Api
-  class StoresController < ActionController::API
+  class StoresController < BaseController
     def index
-
+      render json: Store.all
     end
 
     def update
