@@ -1,6 +1,7 @@
 module Api
   class StoresController < BaseController
     before_action :find_product, only: :update
+    before_action :check_items, only: :check_price
 
     def index
       render json: Store.all
@@ -15,7 +16,12 @@ module Api
     end
 
     def check_price
+      calculate_price = CalculatePriceService.new(params[:items])
+      calculate_price.calculate_total_price
 
+      render json: { price: calculate_price.total_price }
+    rescue StandardError => e
+      render_error(400, e)
     end
 
     private
@@ -28,6 +34,12 @@ module Api
 
     def price_attribute
       params.require(:product).permit(:price)
+    end
+
+    def check_items
+      return render_error(400, "Items param not found") unless params[:items]
+
+      return render_error(400, "Items param must be an array") unless params[:items].class == Array
     end
   end
 end
